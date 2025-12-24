@@ -25,53 +25,40 @@ print(f"Test set: {X_test.shape}")
 print(f"Training class distribution:\n{y_train.value_counts()}")
 print(f"Test class distribution:\n{y_test.value_counts()}")
 
-# Enable autologging
+# Enable autologging - MLflow run handles the experiment/run context
 mlflow.sklearn.autolog()
 
-# Check if running inside mlflow run (active run exists)
-# If yes, use active run; if no, create new run
-active_run = mlflow.active_run()
-if active_run:
-    # Running via 'mlflow run .' - use existing run context
-    run_context = mlflow.start_run(run_id=active_run.info.run_id)
-else:
-    # Running directly via 'python modelling.py'
-    mlflow.set_experiment("heart-disease-classification-basic")
-    run_context = mlflow.start_run(run_name="random-forest-basic")
-
-with run_context:
-  # Train model
-  # Autolog akan otomatis mencatat parameters, metrics, dan model
-  rf_model = RandomForestClassifier(
+# Train model
+print("\nTraining Random Forest model...")
+rf_model = RandomForestClassifier(
     n_estimators=50,
     random_state=42,
     n_jobs=-1
-  )
+)
 
-  rf_model.fit(X_train, y_train)
+rf_model.fit(X_train, y_train)
 
-  # Make predictions
-  y_pred = rf_model.predict(X_test)
+# Make predictions
+y_pred = rf_model.predict(X_test)
 
-  # Print metrics (autolog sudah mencatat semua ini)
-  accuracy = accuracy_score(y_test, y_pred)
-  precision = precision_score(y_test, y_pred, average='weighted')
-  recall = recall_score(y_test, y_pred, average='weighted')
-  f1 = f1_score(y_test, y_pred, average='weighted')
+# Print metrics
+accuracy = accuracy_score(y_test, y_pred)
+precision = precision_score(y_test, y_pred, average='weighted')
+recall = recall_score(y_test, y_pred, average='weighted')
+f1 = f1_score(y_test, y_pred, average='weighted')
 
-  print("\nModel Performance:")
-  print(f"  Accuracy: {accuracy:.4f}")
-  print(f"  Precision (weighted): {precision:.4f}")
-  print(f"  Recall (weighted): {recall:.4f}")
-  print(f"  F1-Score (weighted): {f1:.4f}")
+print("\nModel Performance:")
+print(f"  Accuracy: {accuracy:.4f}")
+print(f"  Precision (weighted): {precision:.4f}")
+print(f"  Recall (weighted): {recall:.4f}")
+print(f"  F1-Score (weighted): {f1:.4f}")
 
-  # Save model ke folder model/ untuk Docker
-  MODEL_DIR = 'model'
-  if os.path.exists(MODEL_DIR):
+# Save model ke folder model/ untuk Docker
+MODEL_DIR = 'model'
+if os.path.exists(MODEL_DIR):
     import shutil
     shutil.rmtree(MODEL_DIR)
-  mlflow.sklearn.save_model(rf_model, MODEL_DIR)
-  print(f"\nModel (MLflow format) saved to: {MODEL_DIR}/")
+mlflow.sklearn.save_model(rf_model, MODEL_DIR)
+print(f"\nModel (MLflow format) saved to: {MODEL_DIR}/")
 
-  print("\nModel berhasil dilatih dan disimpan di MLFlow")
-  print("Gunakan perintah 'mlflow ui' untuk melihat dashboard")
+print("\nModel berhasil dilatih!")

@@ -29,7 +29,7 @@ jobs:
       - name: Run MLflow Training
         working-directory: ./MLProject
         run: |
-          python modelling.py
+          mlflow run . --env-manager=local
 
       - name: Find latest run and model path
         id: find_model

@@ -1,4 +1,5 @@
 import pandas as pd
+import os
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 import mlflow
@@ -55,6 +56,14 @@ with mlflow.start_run(run_name="random-forest-basic"):
   print(f"  Precision (weighted): {precision:.4f}")
   print(f"  Recall (weighted): {recall:.4f}")
   print(f"  F1-Score (weighted): {f1:.4f}")
+
+  # Save model ke folder model/ untuk Docker
+  MODEL_DIR = 'model'
+  if os.path.exists(MODEL_DIR):
+    import shutil
+    shutil.rmtree(MODEL_DIR)
+  mlflow.sklearn.save_model(rf_model, MODEL_DIR)
+  print(f"\nModel (MLflow format) saved to: {MODEL_DIR}/")
 
   print("\nModel berhasil dilatih dan disimpan di MLFlow")
   print("Gunakan perintah 'mlflow ui' untuk melihat dashboard")

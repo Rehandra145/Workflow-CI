@@ -35,17 +35,28 @@ jobs:
         id: find_model
         working-directory: ./MLProject
         run: |
-          # Find the latest run directory
-          LATEST_RUN=$(ls -td mlruns/0/*/ 2>/dev/null | head -1)
+          # Debug: Show mlruns structure
+          echo "=== MLruns structure ==="
+          ls -la mlruns/ || echo "mlruns folder not found"
+          
+          # Find the latest run directory (search all experiments)
+          LATEST_RUN=$(find mlruns -type d -name "artifacts" 2>/dev/null | head -1 | sed 's/artifacts$//')
+          
           if [ -z "$LATEST_RUN" ]; then
             echo "No MLflow runs found!"
+            echo "=== Full directory structure ==="
+            find . -type d -name "mlruns" -exec ls -laR {} \;
             exit 1
           fi
+          
+          echo "Found run at: $LATEST_RUN"
           
           # Find model path
           MODEL_PATH="${LATEST_RUN}artifacts/model"
           if [ ! -d "$MODEL_PATH" ]; then
             echo "Model not found at $MODEL_PATH"
+            echo "=== Available artifacts ==="
+            ls -la "${LATEST_RUN}artifacts/" || echo "No artifacts folder"
             exit 1
           fi
           

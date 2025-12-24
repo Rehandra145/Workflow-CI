@@ -29,19 +29,8 @@ mlflow.set_experiment("heart-disease-classification-basic")
 
 # Enable autologging
 mlflow.sklearn.autolog()
-
-
-# Check if there's already an active run (from mlflow run command)
-active_run = mlflow.active_run()
-if active_run:
-    # Use existing run from mlflow run command
-    run_context = mlflow.start_run(run_id=active_run.info.run_id)
-else:
-    # Start new run when running directly
-    run_context = mlflow.start_run(run_name="random-forest-basic")
-
 # Start MLflow run
-with run_context:
+with mlflow.start_run(run_name="random-forest-basic"):
   # Train model
   # Autolog akan otomatis mencatat parameters, metrics, dan model
   rf_model = RandomForestClassifier(

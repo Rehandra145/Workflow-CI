@@ -25,13 +25,21 @@ print(f"Test set: {X_test.shape}")
 print(f"Training class distribution:\n{y_train.value_counts()}")
 print(f"Test class distribution:\n{y_test.value_counts()}")
 
-# Set experiment name
-mlflow.set_experiment("heart-disease-classification-basic")
-
 # Enable autologging
 mlflow.sklearn.autolog()
-# Start MLflow run
-with mlflow.start_run(run_name="random-forest-basic"):
+
+# Check if running inside mlflow run (active run exists)
+# If yes, use active run; if no, create new run
+active_run = mlflow.active_run()
+if active_run:
+    # Running via 'mlflow run .' - use existing run context
+    run_context = mlflow.start_run(run_id=active_run.info.run_id)
+else:
+    # Running directly via 'python modelling.py'
+    mlflow.set_experiment("heart-disease-classification-basic")
+    run_context = mlflow.start_run(run_name="random-forest-basic")
+
+with run_context:
   # Train model
   # Autolog akan otomatis mencatat parameters, metrics, dan model
   rf_model = RandomForestClassifier(
